@@ -60,15 +60,17 @@ services:
       - hindsight-net
 
   hindsight:
-    image: ghcr.io/vectorize-io/hindsight:${HINDSIGHT_VERSION:-latest}
+    image: hindsight-local:main
+    pull_policy: never
     container_name: hindsight-app
     ports:
-      - "8888:8888"
+      - "8889:8888"
       - "9999:9999"
     environment:
       # LLM Configuration
-      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_API_LLM_PROVIDER:-openai}
-      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:-}
+      HINDSIGHT_API_LLM_PROVIDER: deepseek
+      HINDSIGHT_API_LLM_API_KEY: 
+      HINDSIGHT_API_LLM_MODEL: deepseek-v4-flash
 
       # Database Configuration
       HINDSIGHT_API_DATABASE_URL: postgresql://${HINDSIGHT_DB_USER:-hindsight_user}:${HINDSIGHT_DB_PASSWORD:-hindsight_password}@db:5432/${HINDSIGHT_DB_NAME:-hindsight_db}
@@ -76,6 +78,28 @@ services:
       # Vector and Text Search Extensions
       HINDSIGHT_API_VECTOR_EXTENSION: pgvector
       HINDSIGHT_API_TEXT_SEARCH_EXTENSION: pgroonga
+
+      # HINDSIGHT_API_EMBEDDINGS_PROVIDER: openai
+      # HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY: 
+      # HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: qwen3.7-text-embedding
+      # HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
+      # HINDSIGHT_API_EMBEDDINGS_OPENAI_DIMENSIONS: "1024"
+
+      # HINDSIGHT_API_RERANKER_PROVIDER: cohere
+      # HINDSIGHT_API_RERANKER_COHERE_API_KEY: 
+      # HINDSIGHT_API_RERANKER_COHERE_MODEL: qwen3-rerank
+      # HINDSIGHT_API_RERANKER_COHERE_BASE_URL: https://dashscope.aliyuncs.com/compatible-api/v1/reranks
+
+      HINDSIGHT_API_EMBEDDINGS_PROVIDER: local
+      HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL: /models/multilingual-e5-small
+
+      HINDSIGHT_API_RERANKER_PROVIDER: local
+      HINDSIGHT_API_RERANKER_LOCAL_MODEL: /models/mmarco-mMiniLMv2-L12-H384-v1
+
+      HINDSIGHT_API_LLM_EXTRA_BODY: '{"thinking":{"type":"disabled"}}'
+
+    volumes:
+      - /Users/sujunxi/docker-data/hindsight/models:/models:ro
 
     depends_on:
       - db
